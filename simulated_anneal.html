@@ -1,0 +1,151 @@
+<html>
+<head>
+	<title>This is a javascript raytracer </title>
+</head>
+
+<body onload="start()">
+	<canvas id="canvas1" width="640" height="250" style="border:1px solid #c3c3c3;">
+		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+	</canvas>
+</body>
+
+<script>
+
+var c=document.getElementById("canvas1");
+var width = c.width;
+var height = c.height;
+var ctx=c.getContext("2d");
+var array = new Array();
+var numPts = width/2;
+var bestSol = new coordinate(0, 0);
+
+function coordinate(x, y) {
+	this.x = x;
+	this.y = y;
+}
+
+//so we can get random elements easily
+Array.prototype.randomElement = function () {
+	return this[Math.floor(Math.random() * this.length)]
+}
+
+function generateLine() {
+	array.push(new coordinate(0, height/2));
+	for (var i = 1; i < numPts - 1; i++) { //for each point
+		var newY = -2
+		while (newY < 20 || newY > height - 20) {
+			newY = array[i-1].y - (Math.random() - 0.5) * height/5;
+		}
+		array.push(new coordinate(i, newY));
+	}
+	array.push(new coordinate(width, height/2));
+}
+
+function drawLine() {
+	ctx.lineWidth = 0.5;
+	ctx.strokeStyle = '#111111';
+
+	for (var i = 0; i < numPts - 1; i++) {
+		ctx.beginPath();
+		ctx.moveTo(array[i].x*2, array[i].y); // '*2' spaces out the x coordinates to make a cleaner line
+		ctx.lineTo(array[i+1].x*2, array[i+1].y);
+		ctx.stroke();
+	}
+}
+
+function setupGraph() {
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = '#DDDDDD';
+
+	for (var i = 0; i < height; i+=height/10) { //draw horizontal line every 10 pixels for reference
+		ctx.beginPath();
+		ctx.moveTo(0, i);
+		ctx.lineTo(width, i);
+		ctx.stroke();
+	}
+}
+
+function resetGraph() {
+	//draw the indicator line if we have a better one
+	ctx.canvas.width = ctx.canvas.width; //reset graph?
+	setupGraph();
+	drawLine();
+}
+
+function drawGuess(coordinate, color) {
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = color;
+	ctx.beginPath();
+	ctx.moveTo(coordinate.x*2, 0); //move to bottom under selected coordinate
+	ctx.lineTo(coordinate.x*2, coordinate.y);
+	ctx.stroke();
+}
+
+function simulateAnneal() {
+	var temp = 20;
+	while (temp > 0) {
+		simulateStep();
+		temp -= 0.1;
+	}
+}
+
+function simulateAnneal() {
+
+	animate({
+		delay: 10,
+    duration: 500, // 1 sec by default
+    delta: function linear(progress) {return progress},
+    step: function(delta) {
+    	simulateStep()   
+    }
+});
+}
+
+
+function simulateStep() { //do it one step at a time for animation
+	var newSol = array.randomElement();
+	
+	resetGraph();
+	if (newSol.y > bestSol.y) {
+		bestSol = newSol;
+	}
+	
+	drawGuess(bestSol, '#0000ff');
+	drawGuess(newSol, '#cc0000');
+}
+
+
+
+function animate(opts) {
+	var start = new Date   
+
+	var id = setInterval(function() {
+		var timePassed = new Date - start
+		var progress = timePassed / opts.duration
+
+		if (progress > 1) progress = 1
+
+			var delta = opts.delta(progress)
+		opts.step(delta)
+
+		if (progress == 1) {
+			clearInterval(id)
+		}
+	}, opts.delay || 10)
+
+}
+
+function start() {
+	generateLine();
+	setupGraph();
+	drawLine();
+	simulateAnneal();
+	
+	//after we're done, reset and draw the final prediction
+	resetGraph();
+	drawGuess(bestSol, '#0000ff');
+}
+
+</script>
+
+</html>
