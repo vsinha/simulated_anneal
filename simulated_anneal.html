@@ -2,7 +2,7 @@
 
 <html>
 <head>
-	<title>This is not a javascript raytracer </title>
+	<title>Simulated Annealing TSP solver</title>
 </head>
 
 <body onload="start()">
@@ -10,15 +10,16 @@
 		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
 	</canvas>
 	<br>
-	<button onclick="repick()">Pick New Cities</button><br>
-	<button onclick="resimulate()">Run Simulation</button><br>
+	<button onclick="resimulate()">Rerun Simulation</button><br>
 
 	<table border='0'>
 		<tr>
+			<td>default temp:</td>
+			<td><input id ="tempBox" type="text"/></td>
+		</tr>
+		<tr>
 			<td>temp:</td>
 			<td id="p1"></td>
-			<td>default temp:</td>
-			<input id ="tempBox" type="text" placeholder="100" />
 		</tr>
 		<tr>
 			<td>energy:</td>
@@ -50,6 +51,7 @@ var bestSol;
 var best = Number.MAX_VALUE;
 
 var temp = 100;
+
 
 function coordinate(x, y) {
 	this.x = x;
@@ -256,6 +258,7 @@ function repick() {
 }
 
 function start() {
+	tempBox.value = temp;
 	generateCities();
 	setupGraph();
 	connectCities();
