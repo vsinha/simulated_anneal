@@ -1,38 +1,3 @@
-<!DOCTYPE html>
-
-<html>
-<head>
-	<title>Simulated Annealing TSP solver</title>
-	<script type="text/javascript" source="simulated_anneal.js"></script>
-</head>
-
-<body onload="start()">
-	<canvas id="canvas1" width="640" height="480" style="border:1px solid #c3c3c3;">
-		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
-	</canvas>
-	<br>
-	<button onclick="resimulate()">Rerun Simulation</button><br>
-
-	<table border='0'>
-		<tr>
-			<td>default temp:</td>
-			<td><input id ="tempBox" type="text"/></td>
-		</tr>
-		<tr>
-			<td>temp:</td>
-			<td id="p1"></td>
-		</tr>
-		<tr>
-			<td>energy:</td>
-			<td id="p2"></td>
-		</tr>
-		<tr>
-			<td>best energy:</td>
-			<td id="p3"></td>
-		</tr>
-	</table>
-
-<script>
 var c = document.getElementById("canvas1");
 var p1 = document.getElementById("p1");
 var p2 = document.getElementById("p2");
@@ -263,7 +228,3 @@ function start() {
 
 	simulateAnneal();
 }
-
-</script>
-</body>
-</html>
