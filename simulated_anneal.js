@@ -2,7 +2,10 @@ var c = document.getElementById("canvas1");
 var p1 = document.getElementById("p1");
 var p2 = document.getElementById("p2");
 var p3 = document.getElementById("p3");
+//var p4 = document.getElementById("p4");
+var dropDown = document.getElementById("dropDown");
 var tempBox = document.getElementById("tempBox");
+var citiesBox = document.getElementById("citiesBox");
 var width = c.width;
 var height = c.height;
 var ctx = c.getContext("2d");
@@ -10,10 +13,9 @@ var cities = [];
 var numPts = width/2;
 var numCities = 10;
 var bestSol;
-var best = Number.MAX_VALUE;
-
-var temp = 100;
-
+var best = Number.MAX_VALUE; //start big
+var startTemp = 100;
+var temp = startTemp;
 
 function coordinate(x, y) {
 	this.x = x;
@@ -22,7 +24,7 @@ function coordinate(x, y) {
 
 //so we can get random elements easily
 Array.prototype.randomElement = function () {
-	return this[Math.floor(Math.random() * this.length)]
+	return this[Math.floor(Math.random() * this.length)];
 }
 
 //to copy the array
@@ -30,13 +32,14 @@ Array.prototype.clone = function() {
 	return this.slice(0);
 };
 
-//let's do this with the traveling salesman problem
+//let's do this with the travelling salesman problem
 function generateCities() {
 	var i, newX, newY;
 	for (i = 0; i < numCities; i++) {
 		newX = Math.random() * (width - 10) + 10;
 		newY = Math.random() * (height - 10) + 10;
 		cities.push(new coordinate(newX, newY));
+		
 	}
 }
 
@@ -97,26 +100,11 @@ function setupGraph() {
 	}
 }
 
-function redraw() {
-	//draw the indicator line if we have a better one
-	ctx.canvas.width = ctx.canvas.width; //reset graph?
-	setupGraph();
-	connectCities();
-	drawCities();
-	p2.innerHTML = energy(cities).toFixed(2);
-	//write to best solution div
-	if (energy(cities) < best) {
-		best = energy(cities);
-		bestSol = cities.slice(0);
-		p3.innerHTML = best.toFixed(2);
-	}
-}
-
 function energy(solution) { //sum distance between cities in order
 	var i;
 	var sum = 0;
 	for (i = 0; i < numCities-1; i++) {
-		//distance forumula sqrt((x1 - x2)^2 + (y1 - y2)^2)
+		//distance formula sqrt((x1 - x2)^2 + (y1 - y2)^2)
 		sum += Math.sqrt( Math.pow(solution[i].x - solution[i + 1].x, 2) + Math.pow(solution[i].y - cities[i+1].y, 2));
 	}
 	return sum;
@@ -167,15 +155,39 @@ function simulateAnneal() {
 	animate({
 		delay: 1,
     	duration: 1000, // 1 sec by default
-    	temp: function linear(temp) {
-    		return temp - 0.1;
-    	},
+    	temp: function(temp, progress) {
+			return selectCoolingFunc(temp, progress);
+		},
     	step: function(temp) {
     		simulateStep(temp);
     	}
 	});
-
 }
+
+function selectCoolingFunc(temp, progress) {
+	switch (dropDown.options[dropDown.selectedIndex].text) {
+		case "Linear":
+			return linear(temp, progress);
+		case "Quadratic":
+			return quadratic(temp, progress);
+		case "Logarithmic":
+			return logarithmic(temp, progress);
+	}
+}
+
+//assorted cooling functions
+function linear(temp, progress) {
+    return temp - 0.1;
+}
+
+function quadratic(temp, progress) {
+	return temp - 0.1*Math.pow(progress, 2);
+}
+
+function logarithmic(temp, progress) {
+	return temp + 0.1*Math.log(progress);
+}
+
 
 function animate(opts) {
 	var start = new Date   
@@ -183,22 +195,38 @@ function animate(opts) {
 	var id = setInterval(function() {
 		var timePassed = new Date - start
 		var progress = timePassed / opts.duration
+		//p4.innerHTML = progress.toFixed(2);
 
-		temp = opts.temp(temp)
+		temp = opts.temp(temp, progress)
 
 		if (temp <= 0) {
 			temp = 0;
 		}
 
-		opts.step(temp)
+		opts.step(temp);
 		p1.innerHTML = temp.toFixed(2);
 
 		if (temp == 0) {
 			clearInterval(id);
-			displayFinalSolution();
+			//displayFinalSolution();
 		}
 	}, opts.delay || 10)
 
+}
+
+function redraw() {
+	//draw the indicator line if we have a better one
+	ctx.canvas.width = ctx.canvas.width; //reset graph?
+	setupGraph();
+	connectCities();
+	drawCities();
+	p2.innerHTML = energy(cities).toFixed(2);
+	//write to best solution div
+	if (energy(cities) < best) {
+		best = energy(cities);
+		bestSol = cities.slice(0);
+		p3.innerHTML = best.toFixed(2);
+	}
 }
 
 function displayFinalSolution() {
@@ -207,24 +235,28 @@ function displayFinalSolution() {
 }
 
 function resimulate() {
-	temp = tempBox.value;
+	startTemp = tempBox.value;
+	temp = startTemp;
 	simulateAnneal();
-	displayFinalSolution();
 }
 
 function repick() {
+	startTemp = tempBox.value;
+	numCities = citiesBox.value;
+	cities = [];
+	bestSol = [];
+	best = Number.MAX_VALUE;
 	generateCities();
-	setupGraph();
-	connectCities();
-	drawCities();
+	redraw();
+	resimulate();
 }
 
 function start() {
-	tempBox.value = temp;
+	tempBox.value = startTemp;
+	temp = startTemp;
+	citiesBox.value = numCities;
 	generateCities();
-	setupGraph();
-	connectCities();
-	drawCities(); //draw the cities on top of the connecting lines
-
+	redraw();
+	
 	simulateAnneal();
 }

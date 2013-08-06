@@ -11,12 +11,30 @@
 		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
 	</canvas>
 	<br>
-	<button onclick="resimulate()">Rerun Simulation</button><br>
+	
 
 	<table border='0'>
 		<tr>
-			<td>default temp:</td>
+			<td><button onclick="repick()">Select new cities</button></td>
+			<td><button onclick="resimulate()">Rerun simulation (same cities)</button></td>
+			<td><button onclick="displayFinalSolution()">Go to best solution so far</button></td>
+		</tr>
+		<tr>
+			<td>Number of cities:</td>
+			<td><input id ="citiesBox" type="text"/></td>
+		</tr>
+		<tr>
+			<td>start temp:</td>
 			<td><input id ="tempBox" type="text"/></td>
+		</tr>
+		<tr>
+			<td>cooling schedule:</td>
+			<td><select id="dropDown" onchange="">
+				<option>Linear</option>
+				<!--<option>Quadratic</option>
+				<option>Logarithmic</option>
+				-->
+			</select></td>
 		</tr>
 		<tr>
 			<td>temp:</td>
@@ -29,8 +47,14 @@
 		<tr>
 			<td>best energy:</td>
 			<td id="p3"></td>
+			<!--
+			<td>progress:</td>
+			<td id="p4"></td>
+			-->
 		</tr>
 	</table>
+	
+	
 	<script src="simulated_anneal.js"></script>
 </body>
 </html>
